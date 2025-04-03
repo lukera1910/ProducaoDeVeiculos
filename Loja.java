@@ -12,10 +12,11 @@ class Loja {
     public Loja(int id, Fabrica fabrica) {
         this.id = id;
         this.fabrica = fabrica;
-        this.esteiraVeiculos = new EsteiraVeiculos(20);
+        this.esteiraVeiculos = new EsteiraVeiculos(20); // capacidade menor que a fábrica
     }
 
     public void iniciar() {
+        // thread para comprar veículos da fabrica
         new Thread(() -> {
             while (true) {
                 Veiculo veiculo = fabrica.venderParaLoja(id);

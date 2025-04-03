@@ -14,6 +14,7 @@ class Fabrica {
     private final List<String> logsVenda = Collections.synchronizedList(new ArrayList<>());
 
     public Fabrica() {
+        // cria 4 estações de produção
         for (int i = 1; i <= 4; i++) {
             estacoes.add(new EstacaoProducao(i, this));
         }
@@ -22,6 +23,7 @@ class Fabrica {
     public void iniciarProducao() {
         estacoes.forEach(EstacaoProducao::iniciar);
 
+        // thread para repor peças quando necessário
         new Thread(() -> {
             while (true) {
                 if (pecasDisponiveis.get() < 100) {

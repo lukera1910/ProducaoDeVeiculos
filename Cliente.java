@@ -16,11 +16,13 @@ class Cliente extends Thread {
     @Override
     public void run() {
         Random random = new Random();
-        int compras = random.nextInt(3) + 1;
+        int compras = random.nextInt(3) + 1; // cada cliente compra de 1 a 3 carros
 
         for (int i = 0; i < compras; i++) {
+            // escolhe uma loja aleatória
             Loja loja = lojas.get(random.nextInt(lojas.size()));
 
+            // tenta comprar um veículo
             Veiculo veiculo = loja.venderParaCliente();
             if (veiculo != null) {
                 veiculo.setIdCliente(id);
@@ -29,13 +31,14 @@ class Cliente extends Thread {
             } else {
                 System.out.printf("Cliente %d tentou comprar na loja %d mas não havia veiculos%n", id, loja.getId());
             } try {
-                Thread.sleep(1000);
-                i--;
+                Thread.sleep(1000); // espera antes de tentar novamente
+                i--; // tenta novamente esta compra
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             }
 
+            // intervalo entre compras
             try {
                 Thread.sleep(random.nextInt(2000));
             } catch (InterruptedException e) {

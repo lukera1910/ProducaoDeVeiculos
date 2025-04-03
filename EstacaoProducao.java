@@ -31,10 +31,14 @@ class EstacaoProducao {
         int ferramentaDireita = idFuncionario % 5;
 
         try {
+            // tenta pegar ambas ferramentas
             if (ferramentas[ferramentaEsquerda].tryAcquire()) {
                 if(ferramentas[ferramentaDireita].tryAcquire()) {
+                    // verifica se há peças disponíveis
                     if(fabrica.pegarPecas(10)) {
+                        // simula tempo de produção
                         Thread.sleep(ThreadLocalRandom.current().nextInt(500, 1500));
+                        // cria o veículo
                         Veiculo veiculo = new Veiculo();
                         veiculo.setId(Veiculo.getNextId());
                         veiculo.setCor(id % 3 == 0 ? "VERMELHO" : id % 3 == 1 ? "VERDE" : "AZUL");
@@ -42,6 +46,7 @@ class EstacaoProducao {
                         veiculo.setIdEstacao(id);
                         veiculo.setIdFuncionario(idFuncionario);
 
+                        // adiciona a esteira da fábrica
                         fabrica.adicionarVeiculoEsteira(veiculo);
 
                         ferramentas[ferramentaDireita].release();
