@@ -57,12 +57,13 @@ class Fabrica {
         }
     }
 
-    public void adicionarVeiculoEsteira(Veiculo veiculo) {
+    public void adicionarVeiculoEsteira(Veiculo veiculo) throws InterruptedException {
         esteiraVeiculos.adicionarVeiculo(veiculo);
+        veiculo.setPosicaoEsteira(esteiraVeiculos.getQuantidadeVeiculos());
         registrarProducao(veiculo);
     }
 
-    public Veiculo venderParaLoja(int idLoja) {
+    public Veiculo venderParaLoja(int idLoja) throws InterruptedException {
         Veiculo veiculo = esteiraVeiculos.removerVeiculo();
         if (veiculo != null) {
             veiculo.setIdLoja(idLoja);

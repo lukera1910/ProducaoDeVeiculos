@@ -1,52 +1,60 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class EsteiraVeiculos {
+    private final Veiculo[] buffer;
     private final int capacidade;
-    final Queue<Veiculo> veiculos;
-    private final Semaphore semaforo;
-    private final Lock lock;
+    private int head = 0; // Índice de remoção
+    private int tail = 0; // Índice de inserção
+    private final Lock lock = new ReentrantLock();
+    private final Condition naoCheio = lock.newCondition();
+    private final Condition naoVazio = lock.newCondition();
 
     public EsteiraVeiculos(int capacidade) {
         this.capacidade = capacidade;
-        this.veiculos = new LinkedList<>();
-        this.semaforo = new Semaphore(capacidade);
-        this.lock = new ReentrantLock();
+        this.buffer = new Veiculo[capacidade];
     }
 
-    public void adicionarVeiculo(Veiculo veiculo) {
-        try {
-            semaforo.acquire();
-            lock.lock();
-            try {
-                veiculo.setPosicaoEsteira(veiculos.size() + 1);
-                veiculos.add(veiculo);
-            } finally {
-                lock.unlock();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    public Veiculo removerVeiculo() {
+    public void adicionarVeiculo(Veiculo veiculo) throws InterruptedException {
         lock.lock();
         try {
-            if (!veiculos.isEmpty()) {
-                Veiculo veiculo = veiculos.poll();
-                semaforo.release();
-                return veiculo;
+            while ((tail + 1) % capacidade == head) { // Se estiver cheio
+                naoCheio.await(); // Espera até ter espaço
             }
-            return null;
+            buffer[tail] = veiculo;
+            tail = (tail + 1) % capacidade; // Avança o índice circularmente
+            naoVazio.signal(); // Avisa que há um veículo novo
         } finally {
             lock.unlock();
         }
     }
 
-    public boolean isEmpty() {
-        return veiculos.isEmpty();
+    public Veiculo removerVeiculo() throws InterruptedException {
+        lock.lock();
+        try {
+            while (head == tail) { // Se estiver vazio
+                naoVazio.await(); // Espera até ter um veículo
+            }
+            Veiculo veiculo = buffer[head];
+            head = (head + 1) % capacidade; // Avança o índice circularmente
+            naoCheio.signal(); // Avisa que há espaço livre
+            return veiculo;
+        } finally {
+            lock.unlock();
+        }
     }
+
+    public int getQuantidadeVeiculos() {
+        lock.lock();
+        try {
+            if (tail >= head) {
+                return tail - head;
+            } else {
+                return capacidade - head + tail;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }    
 }

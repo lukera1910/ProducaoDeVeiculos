@@ -19,26 +19,32 @@ class Loja {
         // thread para comprar veículos da fabrica
         new Thread(() -> {
             while (true) {
-                Veiculo veiculo = fabrica.venderParaLoja(id);
-                if (veiculo != null) {
-                    veiculo.setPosicaoEsteiraLoja(esteiraVeiculos.veiculos.size() + 1);
-                    esteiraVeiculos.adicionarVeiculo(veiculo);
-                    registrarCompra(veiculo);
-                } else {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
+                try {
+                    Veiculo veiculo = fabrica.venderParaLoja(id);
+                    if (veiculo != null) {
+                        veiculo.setPosicaoEsteiraLoja(esteiraVeiculos.getQuantidadeVeiculos());
+                        esteiraVeiculos.adicionarVeiculo(veiculo);
+                        registrarCompra(veiculo);
+                    } else {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
                     }
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
         }).start();
     }
 
-    public Veiculo venderParaCliente() {
+    public Veiculo venderParaCliente(int idCliente) throws InterruptedException {
         Veiculo veiculo = esteiraVeiculos.removerVeiculo();
         if (veiculo != null) {
+            veiculo.setIdCliente(idCliente);
             registrarVenda(veiculo);
         }
         return veiculo;

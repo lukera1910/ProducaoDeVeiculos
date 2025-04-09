@@ -21,17 +21,22 @@ class Cliente extends Thread {
         for (int i = 0; i < compras; i++) {
             Loja loja = lojas.get(random.nextInt(lojas.size()));
 
-            Veiculo veiculo = loja.venderParaCliente();
-            if (veiculo != null) {
-                veiculo.setIdCliente(id);
-                garagem.add(veiculo);
-                System.out.printf("Cliente %d comprou veiculo %d na loja %d%n", id, veiculo.getId(), loja.getId());
-            } else {
-                System.out.printf("Cliente %d tentou comprar na loja %d mas não havia veiculos%n", id, loja.getId());
-            } try {
-                Thread.sleep(1000); 
-                i--; 
-            } catch (InterruptedException e) {
+            try {
+                Veiculo veiculo = loja.venderParaCliente(this.id);
+                if (veiculo != null) {
+                    veiculo.setIdCliente(id);
+                    garagem.add(veiculo);
+                    System.out.printf("Cliente %d comprou veiculo %d na loja %d%n", id, veiculo.getId(), loja.getId());
+                } else {
+                    System.out.printf("Cliente %d tentou comprar na loja %d mas não havia veiculos%n", id, loja.getId());
+                } try {
+                    Thread.sleep(1000); 
+                    i--; 
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 break;
             }
