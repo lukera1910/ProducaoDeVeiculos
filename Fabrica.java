@@ -12,6 +12,8 @@ class Fabrica {
     private final EsteiraVeiculos esteiraVeiculos = new EsteiraVeiculos(40);
     private final List<String> logsProducao = Collections.synchronizedList(new ArrayList<>());
     private final List<String> logsVenda = Collections.synchronizedList(new ArrayList<>());
+    private boolean producaoAtiva = true;
+    private boolean producaoEncerrada = false;
 
     public Fabrica() {
         // cria 4 estações de produção
@@ -23,13 +25,18 @@ class Fabrica {
     public void iniciarProducao() {
         estacoes.forEach(EstacaoProducao::iniciar);
 
-        // thread para repor peças quando necessário
         new Thread(() -> {
-            while (true) {
+            int reposicoes = 0;
+            while (producaoAtiva) {
                 if (pecasDisponiveis.get() < 100) {
-                    int repor = ESTOQUE_MAXIMO_PECAS - pecasDisponiveis.get();
-                    pecasDisponiveis.addAndGet(repor);
-                    System.out.println("Respostas " + repor + " pecas. Total: " + pecasDisponiveis.get());
+                    if (reposicoes < 3){
+                        int repor = ESTOQUE_MAXIMO_PECAS - pecasDisponiveis.get();
+                        pecasDisponiveis.addAndGet(repor);
+                        reposicoes++;
+                        System.out.println("Respostas " + repor + " pecas. Total: " + pecasDisponiveis.get());
+                    } else {
+                        encerrarProducao();
+                    }
                 }
                 try {
                     Thread.sleep(1000);
@@ -85,6 +92,22 @@ class Fabrica {
         logsVenda.add(log);
         System.out.println(log);
     }
+
+    public boolean isProducaoAtiva() {
+        return producaoAtiva;
+    }
+
+    public synchronized void encerrarProducao() {
+        if (!producaoEncerrada) {
+            producaoAtiva = false;
+            producaoEncerrada = true;
+            System.out.println(">>> ENCERRANDO PRODUÇÃO: Estoque de peças esgotado.");
+        }
+    }
+
+    public int getQuantidadeVeiculosNaEsteira() {
+        return esteiraVeiculos.getQuantidadeVeiculos();
+    }    
 
     public List<String> getLogsProducao() {
         return new ArrayList<>(logsProducao);

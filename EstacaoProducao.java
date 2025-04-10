@@ -72,6 +72,10 @@ class EstacaoProducao {
     public int getId() {
         return id;
     }
+
+    public Fabrica getFabrica() {
+        return fabrica;
+    }
 }
 
 class Funcionario implements Runnable {
@@ -86,19 +90,26 @@ class Funcionario implements Runnable {
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-            boolean produziu = estacao.produzirVeiculo(this);
-            if (!produziu) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            if (!estacao.getFabrica().isProducaoAtiva()) {
+                System.out.println("Estação " + estacao.getId() + " encerrando trabalho.");
+                break;
+            }
+
+            estacao.produzirVeiculo(this);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
         }
     }
 
     public int getId() {
         return id;
+    }
+    
+    public Fabrica getFabrica() {
+        return estacao.getFabrica();
     }
 }

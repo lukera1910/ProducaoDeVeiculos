@@ -20,18 +20,18 @@ class Loja {
         new Thread(() -> {
             while (true) {
                 try {
+                    if (!fabrica.isProducaoAtiva() && fabrica.getQuantidadeVeiculosNaEsteira() == 0) {
+                        System.out.println("Loja " + id + " encerrando compras. Fábrica não produz mais.");
+                        break;
+                    }
+
                     Veiculo veiculo = fabrica.venderParaLoja(id);
                     if (veiculo != null) {
-                        veiculo.setPosicaoEsteiraLoja(esteiraVeiculos.getQuantidadeVeiculos());
+                        veiculo.setPosicaoEsteira(esteiraVeiculos.getQuantidadeVeiculos());
                         esteiraVeiculos.adicionarVeiculo(veiculo);
                         registrarCompra(veiculo);
                     } else {
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            break;
-                        }
+                        Thread.sleep(500);
                     }
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
